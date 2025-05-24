@@ -1,0 +1,97 @@
+<!-- public/projectHours.html -->
+<!-- Ashley Timko 05/09/25-->
+<!-- projectHours styling file-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> TCSS 445 | Assign 3 | Project Hours Search</title>
+    <!-- Use Bootswatch Lux theme for Bootstrap styling -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.0/dist/superhero/bootstrap.min.css">
+</head>
+<body>
+<div class="container mt-5">
+    <h2>Search Department Project Hours</h2>
+
+    <!-- Form to input the minimum number of hours -->
+    <form id="hoursForm">
+        <div class="mb-3">
+            <label for="minHours" class="form-label">Minimum Hours Worked:</label>
+            <input type="number" id="minHours" class="form-control" required min="0" value="20">
+        </div>
+        <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+
+    <!-- Show results table -->
+    <div id="results" class="mt-4" style="display: none;">
+        <h3>Project Hours Summary</h3>
+        <table class="table table-bordered table-striped">
+            <thead class="table-dark fs-5 fw-bold text-white">
+            <tr>
+                <th>Department Name</th>
+                <th>Project Name</th>
+                <th>Manager Name</th>
+                <th>Number of Employees</th>
+                <th>Total Project Hours</th>
+            </tr>
+            </thead>
+            <tbody id="resultsBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- JavaScript for handling form submission and displaying results -->
+    <script>
+    document.getElementById('hoursForm').addEventListener('submit', async function(event) {
+        event.preventDefault(); // Prevent page reload on submit
+
+        const minHours = document.getElementById('minHours').value; // Gets user inputs
+
+        // Fetch project hours details from the server
+        const response = await fetch(`/projectHour?minHours=${encodeURIComponent(minHours)}`);
+        const resultsBody = document.getElementById('resultsBody');
+        resultsBody.innerHTML = ''; // Clear previous results
+        const resultsSection = document.getElementById('results');
+
+        /**
+        if (isNaN(minHours) || minHours <= 19) {
+            resultsSection.style.display = 'block';
+            resultsBody.innerHTML = `<tr><td colspan="5" class="text-center text-danger">Please enter a number greater than 19.</td></tr>`;
+            return;
+        }
+        **/
+
+        if (response.ok) {
+            const data = await response.json();
+
+ 
+        // Check if the data is empty (no projects found) fail safe
+        if (data.length === 0) {
+            resultsSection.style.display = 'block';
+            resultsBody.innerHTML = `<tr><td colspan="5" class="text-center text-danger">No projects found with more than ${minHours} hours.</td></tr>`;
+        } 
+        else {           
+            data.forEach(({ DepartmentName, ProjectName, ManagerName, NumEmployees, TotalHours }) => {
+                resultsBody.innerHTML += `
+                    <tr>
+                        <td>${DepartmentName}</td>
+                        <td>${ProjectName}</td>
+                        <td>${ManagerName}</td>
+                        <td>${NumEmployees}</td>
+                        <td>${TotalHours}</td>
+                    </tr>
+                 `;
+            });
+            resultsSection.style.display = 'block';
+            } 
+        }
+        // If the table doesnt have more than X amount of hours
+        else {
+            resultsSection.style.display = 'block';
+            resultsBody.innerHTML = `<tr><td colspan="5" class="text-center text-danger">No projects found with more than ${minHours} hours.</td></tr>`;
+        }
+    });
+    </script>
+</body>
+</html>

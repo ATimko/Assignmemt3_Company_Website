@@ -1,0 +1,70 @@
+<!-- public/project.html -->
+<!-- Ashley Timko 05/09/25-->
+<!-- project styling file-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> TCSS 445 | Assign 3 | Project Search</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.0/dist/superhero/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Search Project Information</h2>
+        <form id="projectForm">
+            <label for="projectName" class="form-label">Enter Project Name:</label>
+            <input type="text" id="projectName" class="form-control mb-3" placeholder="Project Name" required>
+            <button type="submit" class="btn btn-primary">Search</button>
+        </form>
+
+    <!-- Table for displaying results -->
+    <div id="resultSection" class="mt-4" style="display: none;">
+        <h3>Project Details</h3>
+        <table class="table table-bordered table-striped">
+            <thead class="table-dark fs-5 fw-bold text-white">
+                <tr>
+                    <th>Project Name</th>
+                    <th>Employee Name</th>
+                    <th>Employee SSN</th>
+                    <th>Hours Worked</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+        </div>
+    </div>
+
+<!-- JavaScript for handling form submission and displaying results -->
+    <script>
+    document.getElementById('projectForm').addEventListener('submit', async function(event) {
+        event.preventDefault();
+
+        const projectName = document.getElementById('projectName').value;
+        const response = await fetch(`/project?projectName=${encodeURIComponent(projectName)}`);
+        const tableBody = document.getElementById('tableBody');
+        tableBody.innerHTML = ''; // Clear previous results
+        const resultSection = document.getElementById('resultSection');
+
+        if (response.ok) {
+            const data = await response.json();
+            data.forEach(({ ProjectName, EmployeeFirstName, EmployeeLastName, EmployeeSSN, HoursWorked }) => {
+                tableBody.innerHTML += `
+                    <tr>
+                        <td>${ProjectName}</td>
+                        <td>${EmployeeFirstName} ${EmployeeLastName}</td>
+                        <td>${EmployeeSSN}</td>
+                        <td>${HoursWorked}</td>
+                    </tr>
+                 `;
+            });
+            resultSection.style.display = 'block';
+            } 
+            else {
+                resultSection.style.display = 'block';
+                resultSection.innerHTML = `<p class="text-danger">No project found with that name.</p>`;
+            }
+        });
+    </script>
+</body>
+</html>
